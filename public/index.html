@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#1e3a8a">
+<title>سامانه انبارداری</title>
+<style>
+  * { box-sizing:border-box; font-family:Tahoma,sans-serif;
+      -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:#f0f4f8; color:#1e293b; font-size:14px; }
+  header {
+    background:linear-gradient(90deg,#1e3a8a,#2563eb);
+    color:#fff; padding:10px 15px; display:flex;
+    justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:8px; position:sticky; top:0; z-index:30;
+  }
+  header h1 { margin:0; font-size:15px; }
+  nav { background:#1e293b; padding:8px; display:flex;
+        flex-wrap:wrap; gap:5px; position:sticky; top:52px; z-index:29; }
+  nav button { background:#334155; color:#fff; border:none;
+    padding:8px 12px; border-radius:6px; cursor:pointer;
+    font-size:12px; transition:.2s; }
+  nav button.active { background:#2563eb; }
+  main { padding:10px; max-width:1100px; margin:auto; padding-bottom:80px; }
+  .section { display:none; background:#fff; padding:14px;
+             border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .section.active { display:block; }
+  h2 { color:#1e3a8a; border-bottom:2px solid #2563eb;
+       padding-bottom:6px; margin-top:0; font-size:16px; }
+  h3 { color:#1e40af; margin:14px 0 8px; font-size:14px; }
+  h4 { color:#475569; margin:10px 0 6px; font-size:13px; }
+  .form-grid { display:grid;
+    grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+  .form-grid .full { grid-column:1/-1; }
+  .form-grid-3 { display:grid;
+    grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+  .form-grid-3 .full { grid-column:1/-1; }
+  input,select,textarea { padding:10px; border:1px solid #cbd5e1;
+    border-radius:8px; font-size:14px; width:100%;
+    font-family:inherit; background:#fff; }
+  input:focus,select:focus { outline:2px solid #93c5fd; border-color:#2563eb; }
+  .btn { background:#2563eb; color:#fff; border:none;
+    padding:11px 18px; border-radius:8px; cursor:pointer;
+    font-size:13px; transition:.2s; font-weight:bold; }
+  .btn:active { transform:scale(.97); }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .btn-block { width:100%; }
+  .btn-danger { background:#dc2626; }
+  .btn-green { background:#16a34a; }
+  .btn-gray { background:#64748b; }
+  .btn-orange { background:#ea580c; }
+  .btn-purple { background:#7c3aed; }
+  .btn-sm { padding:6px 10px; font-size:12px; }
+  .btn-xs { padding:4px 8px; font-size:11px; }
+
+  .card-list { margin-top:12px; }
+  .card { background:#f8fafc; border:1px solid #e2e8f0;
+    border-radius:10px; padding:10px; margin-bottom:8px;
+    font-size:12px; }
+  .card-header { display:flex; justify-content:space-between;
+    align-items:center; margin-bottom:6px;
+    padding-bottom:6px; border-bottom:1px dashed #cbd5e1; gap:5px; flex-wrap:wrap; }
+  .card-header strong { color:#1e3a8a; font-size:14px; }
+  .card-row { display:flex; justify-content:space-between;
+    padding:3px 0; color:#475569; gap:10px; }
+  .card-row span:first-child { color:#64748b; flex-shrink:0; }
+  .card-actions { display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+
+  .badge { padding:3px 8px; border-radius:10px; font-size:11px;
+           color:#fff; white-space:nowrap; display:inline-block; }
+  .badge-in { background:#16a34a; }
+  .badge-wait { background:#f59e0b; }
+  .badge-info { background:#2563eb; }
+  .badge-out { background:#dc2626; }
+  .badge-gray { background:#94a3b8; }
+
+  .stat-card { background:linear-gradient(135deg,#2563eb,#1e3a8a);
+    color:#fff; padding:12px; border-radius:10px; text-align:center; }
+  .stat-card h3 { margin:0 0 4px; font-size:11px; opacity:.9; color:#fff; }
+  .stat-card p { margin:0; font-size:16px; font-weight:bold; }
+  .stats { display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:8px; margin-bottom:12px; }
+
+  .empty { text-align:center; color:#94a3b8; padding:25px; font-size:13px; }
+  .loading { text-align:center; color:#2563eb; padding:15px; font-size:13px; }
+
+  /* تیک‌ها */
+  .checks { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
+  .check-item {
+    display:flex; align-items:center; gap:5px;
+    background:#f1f5f9; padding:7px 12px; border-radius:8px;
+    font-size:12px; cursor:pointer; border:2px solid transparent;
+    transition:.2s; user-select:none;
+  }
+  .check-item.done { background:#dcfce7; border-color:#16a34a;
+    color:#166534; font-weight:bold; }
+  .check-item input { display:none; }
+
+  /* مودال */
+  .modal-bg {
+    position:fixed; inset:0; background:rgba(0,0,0,.6);
+    z-index:100; display:none; align-items:center;
+    justify-content:center; padding:15px;
+  }
+  .modal-bg.open { display:flex; }
+  .modal {
+    background:#fff; border-radius:14px; padding:16px;
+    width:100%; max-width:600px;
+    max-height:92vh; overflow-y:auto;
+  }
+  .modal-header { display:flex; justify-content:space-between;
+    align-items:center; margin-bottom:12px;
+    padding-bottom:8px; border-bottom:2px solid #e2e8f0; }
+  .modal-header h3 { margin:0; color:#1e3a8a; }
+
+  /* تقویم */
+  .jpicker-panel {
+    position:fixed; inset:0; z-index:100;
+    background:rgba(0,0,0,.5);
+    display:none; align-items:center; justify-content:center;
+    padding:15px;
+  }
+  .jpicker-panel.open { display:flex; }
+  .jpicker-inner {
+    background:#fff; border-radius:14px; padding:14px;
+    width:100%; max-width:340px; direction:rtl;
+    max-height:90vh; overflow-y:auto;
+  }
+  .jpicker-header {
+    display:flex; justify-content:space-between;
+    align-items:center; margin-bottom:10px; gap:5px;
+  }
+  .jpicker-header button {
+    background:#2563eb; color:#fff; border:none;
+    width:32px; height:32px; border-radius:50%;
+    cursor:pointer; font-weight:bold; font-size:16px;
+  }
+  .jpicker-header select {
+    padding:6px; border:1px solid #cbd5e1;
+    border-radius:8px; font-size:13px; flex:1;
+  }
+  .jpicker-grid {
+    display:grid; grid-template-columns:repeat(7,1fr);
+    gap:4px; text-align:center;
+  }
+  .jpicker-grid .dow {
+    font-size:12px; color:#64748b; font-weight:bold; padding:5px 0;
+  }
+  .jpicker-grid .day {
+    padding:10px 0; border-radius:8px; cursor:pointer;
+    font-size:14px; transition:.15s;
+  }
+  .jpicker-grid .day.today { background:#fef3c7; font-weight:bold; }
+  .jpicker-grid .day.selected { background:#2563eb; color:#fff; }
+  .jpicker-grid .day.empty { cursor:default; }
+  .jpicker-footer { display:flex; gap:8px; margin-top:12px; }
+  .jpicker-footer button {
+    flex:1; background:#e2e8f0; border:none; padding:10px;
+    border-radius:8px; cursor:pointer; font-size:13px; font-weight:bold;
+  }
+  .jpicker-footer .ok { background:#2563eb; color:#fff; }
+
+  /* ساعت */
+  .tpicker-panel {
+    position:fixed; inset:0; z-index:100;
+    background:rgba(0,0,0,.5);
+    display:none; align-items:center; justify-content:center; padding:15px;
+  }
+  .tpicker-panel.open { display:flex; }
+  .tpicker-inner {
+    background:#fff; border-radius:14px; padding:16px;
+    width:100%; max-width:280px; direction:ltr;
+  }
+  .tpicker-title { text-align:center; margin:0 0 12px;
+    color:#1e3a8a; font-size:15px; direction:rtl; }
+  .tpicker-row {
+    display:flex; align-items:center; justify-content:center;
+    gap:10px; margin-bottom:10px;
+  }
+  .tpicker-row .num {
+    font-size:36px; font-weight:bold; color:#1e3a8a;
+    min-width:70px; text-align:center; direction:ltr;
+    background:#f1f5f9; border-radius:8px; padding:5px;
+  }
+  .tpicker-row button {
+    background:#2563eb; color:#fff; border:none;
+    width:42px; height:42px; border-radius:50%;
+    font-size:20px; cursor:pointer;
+  }
+  .tpicker-sep { font-size:32px; font-weight:bold; color:#1e3a8a; }
+  .tpicker-footer { display:flex; gap:8px; margin-top:12px; }
+  .tpicker-footer button {
+    flex:1; background:#e2e8f0; border:none;
+    padding:11px; border-radius:8px; cursor:pointer;
+    font-size:13px; font-weight:bold;
+  }
+  .tpicker-footer .ok { background:#2563eb; color:#fff; }
+
+  .rel-time { font-size:10px; color:#64748b; margin-top:2px; display:block; }
+
+  .filter-box {
+    background:#f1f5f9; border-radius:10px; padding:12px;
+    margin-bottom:12px; display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:8px;
+  }
+  .filter-box label { font-size:12px; color:#475569;
+    display:block; margin-bottom:3px; }
+
+  #login { position:fixed; inset:0; background:rgba(0,0,0,.75);
+    display:flex; align-items:center; justify-content:center;
+    z-index:200; padding:15px; }
+  #login .box { background:#fff; padding:25px; border-radius:14px;
+    width:100%; max-width:340px; }
+
+  .toast {
+    position:fixed; bottom:20px; left:50%;
+    transform:translateX(-50%);
+    background:#1e293b; color:#fff; padding:12px 20px;
+    border-radius:10px; font-size:13px; z-index:300;
+    box-shadow:0 6px 20px rgba(0,0,0,.3);
+    opacity:0; transition:.3s; pointer-events:none;
+    max-width:90%;
+  }
+  .toast.show { opacity:1; }
+  .toast.success { background:#16a34a; }
+  .toast.error { background:#dc2626; }
+
+  /* ردیف‌های آیتم سوراخ‌کاری */
+  .item-row {
+    background:#f8fafc; border:1px solid #e2e8f0;
+    border-radius:8px; padding:8px; margin-bottom:6px;
+    display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto;
+    gap:6px; align-items:center; font-size:12px;
+  }
+  .item-row input, .item-row select { padding:6px; font-size:12px; }
+  .item-row .del-btn {
+    background:#dc2626; color:#fff; border:none;
+    padding:6px 8px; border-radius:6px; cursor:pointer;
+    font-size:11px;
+  }
+
+  .info-box {
+    background:#eff6ff; border-right:4px solid #2563eb;
+    padding:10px; border-radius:8px; font-size:12px;
+    margin:8px 0; color:#1e40af;
+  }
+  .warn-box {
+    background:#fef3c7; border-right:4px solid #f59e0b;
+    padding:10px; border-radius:8px; font-size:12px;
+    margin:8px 0; color:#92400e;
+  }
+
+  .structure-materials-list {
+    background:#f8fafc; border-radius:8px;
+    padding:8px; margin:8px 0; font-size:12px;
+  }
+  .mat-item {
+    display:flex; justify-content:space-between;
+    padding:4px 0; border-bottom:1px dashed #e2e8f0;
+  }
+  .mat-item:last-child { border-bottom:none; }
+
+  @media (max-width:480px){
+    .form-grid, .form-grid-3 { grid-template-columns:1fr 1fr; }
+    .item-row { grid-template-columns:1fr 1fr; }
+    .item-row .del-btn { grid-column:1/-1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ ورود ============ -->
+<div id="login">
+  <div class="box">
+    <h2 style="text-align:center;border:none;margin-bottom:20px">
+      🔐 ورود به سامانه
+    </h2>
+    <input id="lg-user" placeholder="نام کاربری" autocomplete="username"><br><br>
+    <input id="lg-pass" type="password" placeholder="رمز عبور" autocomplete="current-password"><br><br>
+    <button class="btn btn-block" id="lg-btn" onclick="doLogin()">ورود</button>
+    <p id="lg-err" style="color:#dc2626;text-align:center;font-size:12px;margin-top:10px;min-height:18px"></p>
+    <p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:10px">
+      پیش‌فرض: admin / 1234
+    </p>
+  </div>
+</div>
+
+<header>
+  <h1>🏭 سامانه انبارداری</h1>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <span id="topDate" style="font-size:11px;opacity:.9"></span>
+    <span class="badge badge-in" id="curUser">-</span>
+    <button class="btn btn-danger btn-sm" onclick="logout()">خروج</button>
+  </div>
+</header>
+
+<nav id="nav"></nav>
+<main id="main"></main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  تقویم شمسی
+// ============================================================
+function pad2(n){ return n < 10 ? '0'+n : ''+n; }
+function div(a,b){ return ~~(a/b); }
+function jalCal(jy){
+  const breaks=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+  let bl=breaks.length,gy=jy+621,leapJ=-14,jp=breaks[0];
+  let jm,jump,leap,N,i;
+  if(jy<jp||jy>=breaks[bl-1]) throw new Error('Invalid year');
+  for(i=1;i<bl;i++){ jm=breaks[i]; jump=jm-jp; if(jy<jm) break;
+    leapJ=leapJ+div(jump,33)*8+div(jump%33,4); jp=jm; }
+  N=jy-jp;
+  leapJ=leapJ+div(N,33)*8+div((N%33)+3,4);
+  if(jump%33===4 && jump-N===4) leapJ++;
+  const leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;
+  const march=20+leapJ-leapG;
+  if(jump-N<6) N=N-jump+div(jump+4,33)*33;
+  leap=(((N+1)%33)-1)%4; if(leap===-1) leap=4;
+  return {leap,gy,march};
+}
+function g2d(gy,gm,gd){
+  let d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*((gm+9)%12)+2,5)+gd-34840408;
+  d=d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752; return d;
+}
+function d2g(jdn){
+  let j=4*jdn+139361631;
+  j=j+div(div(4*jdn+183187720,146097)*3,4)*4-3908;
+  const i=div((j%1461),4)*5+308;
+  const gd=div((i%153),5)+1;
+  const gm=(div(i,153)%12)+1;
+  const gy=div(j,1461)-100100+div(8-gm,6);
+  return {gy,gm,gd};
+}
+function j2d(jy,jm,jd){
+  const r=jalCal(jy);
+  return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1;
+}
+function d2j(jdn){
+  const gy=d2g(jdn).gy;
+  let jy=gy-621;
+  const r=jalCal(jy);
+  const jdn1f=g2d(gy,3,r.march);
+  let jd,jm,k=jdn-jdn1f;
+  if(k>=0){
+    if(k<=185){ jm=1+div(k,31); jd=(k%31)+1; return {jy,jm,jd}; }
+    k-=186;
+  } else { jy-=1; k+=179; if(r.leap===1) k+=1; }
+  jm=7+div(k,30); jd=(k%30)+1;
+  return {jy,jm,jd};
+}
+function jalaaliMonthLength(jy,jm){
+  if(jm<=6) return 31;
+  if(jm<=11) return 30;
+  if(jm===12){ const r=jalCal(jy); return r.leap===1?30:29; }
+  return 30;
+}
+function toJalali(gy,gm,gd){ return d2j(g2d(gy,gm,gd)); }
+function toGregorian(jy,jm,jd){ return d2g(j2d(jy,jm,jd)); }
+
+const FA_MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور',
+  'مهر','آبان','آذر','دی','بهمن','اسفند'];
+const FA_DOW=['ش','ی','د','س','چ','پ','ج'];
+const FA_DOW_FULL=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];
+
+function todayJalali(){
+  const d=new Date();
+  const j=toJalali(d.getFullYear(),d.getMonth()+1,d.getDate());
+  return `${j.jy}/${pad2(j.jm)}/${pad2(j.jd)}`;
+}
+function nowTime(){
+  const d=new Date();
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function formatJalali(str){
+  if(!str) return '';
+  const m=str.match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
+  if(!m) return str;
+  return `${parseInt(m[3])} ${FA_MONTHS[parseInt(m[2])-1]} ${m[1]}`;
+}
+function relativeTime(dateStr,timeStr){
+  if(!dateStr) return '';
+  const m=dateStr.match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
+  if(!m) return '';
+  const g=toGregorian(+m[1],+m[2],+m[3]);
+  const [hh,mm]=(timeStr||'00:00').split(':').map(Number);
+  const target=new Date(g.gy,g.gm-1,g.gd,hh,mm);
+  const diff=(Date.now()-target.getTime())/1000;
+  if(diff<60) return 'همین الان';
+  if(diff<3600) return `${Math.floor(diff/60)} دقیقه پیش`;
+  if(diff<86400) return `${Math.floor(diff/3600)} ساعت پیش`;
+  if(diff<172800) return 'دیروز';
+  if(diff<2592000) return `${Math.floor(diff/86400)} روز پیش`;
+  if(diff<31536000) return `${Math.floor(diff/2592000)} ماه پیش`;
+  return `${Math.floor(diff/31536000)} سال پیش`;
+}
+
+// ============================================================
+//  تاریخ‌سنج
+// ============================================================
+class JalaliPicker {
+  constructor(input){
+    this.input=input; this.input.readOnly=true;
+    this.panel=document.createElement('div');
+    this.panel.className='jpicker-panel';
+    this.panel.innerHTML='<div class="jpicker-inner"></div>';
+    document.body.appendChild(this.panel);
+    const cur=input.value||todayJalali();
+    const [jy,jm,jd]=cur.split('/').map(Number);
+    this.jy=jy; this.jm=jm; this.jd=jd;
+    this.render();
+    input.addEventListener('click',()=>this.open());
+    this.panel.addEventListener('click',e=>{ if(e.target===this.panel) this.close(); });
+  }
+  open(){ this.panel.classList.add('open'); this.render(); }
+  close(){ this.panel.classList.remove('open'); }
+  render(){
+    const inner=this.panel.querySelector('.jpicker-inner');
+    inner.innerHTML=`
+      <div class="jpicker-header">
+        <button type="button" class="prevY">«</button>
+        <button type="button" class="prevM">‹</button>
+        <select class="month"></select>
+        <select class="year"></select>
+        <button type="button" class="nextM">›</button>
+        <button type="button" class="nextY">»</button>
+      </div>
+      <div class="jpicker-grid dow">${FA_DOW.map(d=>`<div class="dow">${d}</div>`).join('')}</div>
+      <div class="jpicker-grid days"></div>
+      <div class="jpicker-footer">
+        <button type="button" class="btnToday">امروز</button>
+        <button type="button" class="btnClear">پاک</button>
+        <button type="button" class="ok">تأیید</button>
+      </div>`;
+    const yearSel=inner.querySelector('.year');
+    const t=new Date();
+    const baseYear=toJalali(t.getFullYear(),t.getMonth()+1,t.getDate()).jy;
+    for(let y=baseYear-10;y<=baseYear+3;y++){
+      const o=document.createElement('option'); o.value=y; o.textContent=y;
+      if(y===this.jy) o.selected=true; yearSel.appendChild(o);
+    }
+    const monthSel=inner.querySelector('.month');
+    FA_MONTHS.forEach((m,i)=>{
+      const o=document.createElement('option'); o.value=i+1; o.textContent=m;
+      if(i+1===this.jm) o.selected=true; monthSel.appendChild(o);
+    });
+    yearSel.onchange=e=>{ this.jy=+e.target.value; this.render(); };
+    monthSel.onchange=e=>{ this.jm=+e.target.value; this.render(); };
+    inner.querySelector('.prevY').onclick=()=>{ this.jy--; this.render(); };
+    inner.querySelector('.nextY').onclick=()=>{ this.jy++; this.render(); };
+    inner.querySelector('.prevM').onclick=()=>{ this.jm--; if(this.jm<1){this.jm=12;this.jy--;} this.render(); };
+    inner.querySelector('.nextM').onclick=()=>{ this.jm++; if(this.jm>12){this.jm=1;this.jy++;} this.render(); };
+    inner.querySelector('.btnToday').onclick=()=>{
+      const tt=todayJalali().split('/').map(Number);
+      this.jy=tt[0]; this.jm=tt[1]; this.jd=tt[2]; this.pick(this.jd);
+    };
+    inner.querySelector('.btnClear').onclick=()=>{ this.input.value=''; this.close(); };
+    inner.querySelector('.ok').onclick=()=>this.pick(this.jd||1);
+
+    const daysBox=inner.querySelector('.days');
+    daysBox.innerHTML='';
+    const g=toGregorian(this.jy,this.jm,1);
+    const gDate=new Date(g.gy,g.gm-1,g.gd);
+    const dow=(gDate.getDay()+1)%7;
+    const dim=jalaaliMonthLength(this.jy,this.jm);
+    for(let i=0;i<dow;i++){
+      const d=document.createElement('div'); d.className='day empty';
+      daysBox.appendChild(d);
+    }
+    const [ty,tm,td]=todayJalali().split('/').map(Number);
+    for(let day=1;day<=dim;day++){
+      const el=document.createElement('div'); el.className='day'; el.textContent=day;
+      if(this.jy===ty && this.jm===tm && day===td) el.classList.add('today');
+      if(day===this.jd) el.classList.add('selected');
+      el.onclick=()=>this.pick(day);
+      daysBox.appendChild(el);
+    }
+  }
+  pick(day){
+    this.jd=day;
+    this.input.value=`${this.jy}/${pad2(this.jm)}/${pad2(this.jd)}`;
+    this.close();
+  }
+}
+
+// ============================================================
+//  ساعت‌سنج
+// ============================================================
+class TimePicker {
+  constructor(input){
+    this.input=input; this.input.readOnly=true;
+    this.panel=document.createElement('div');
+    this.panel.className='tpicker-panel';
+    this.panel.innerHTML='<div class="tpicker-inner"></div>';
+    document.body.appendChild(this.panel);
+    const cur=input.value||nowTime();
+    const [h,m]=cur.split(':').map(Number);
+    this.h=h; this.m=m;
+    this.render();
+    input.addEventListener('click',()=>this.open());
+    this.panel.addEventListener('click',e=>{ if(e.target===this.panel) this.close(); });
+  }
+  open(){ this.panel.classList.add('open'); this.render(); }
+  close(){ this.panel.classList.remove('open'); }
+  render(){
+    const inner=this.panel.querySelector('.tpicker-inner');
+    inner.innerHTML=`
+      <h3 class="tpicker-title">⏰ انتخاب ساعت</h3>
+      <div class="tpicker-row">
+        <button type="button" class="hUp">▲</button>
+        <button type="button" class="mUp">▲</button>
+      </div>
+      <div class="tpicker-row">
+        <span class="num hNum">${pad2(this.h)}</span>
+        <span class="tpicker-sep">:</span>
+        <span class="num mNum">${pad2(this.m)}</span>
+      </div>
+      <div class="tpicker-row">
+        <button type="button" class="hDown">▼</button>
+        <button type="button" class="mDown">▼</button>
+      </div>
+      <div class="tpicker-footer">
+        <button type="button" class="btnNow">الان</button>
+        <button type="button" class="ok">تأیید</button>
+      </div>`;
+    inner.querySelector('.hUp').onclick=()=>{ this.h=(this.h+1)%24; this.render(); };
+    inner.querySelector('.hDown').onclick=()=>{ this.h=(this.h+23)%24; this.render(); };
+    inner.querySelector('.mUp').onclick=()=>{ this.m=(this.m+5)%60; this.render(); };
+    inner.querySelector('.mDown').onclick=()=>{ this.m=(this.m+55)%60; this.render(); };
+    inner.querySelector('.btnNow').onclick=()=>{
+      const t=nowTime().split(':').map(Number);
+      this.h=t[0]; this.m=t[1]; this.render();
+    };
+    inner.querySelector('.ok').onclick=()=>this.pick();
+  }
+  pick(){
+    this.input.value=`${pad2(this.h)}:${pad2(this.m)}`;
+    this.close();
+  }
+}
+
+function initJalaliInputs(scope){
+  (scope||document).querySelectorAll('input[data-jalali="1"]').forEach(inp=>{
+    if(!inp.value) inp.value=todayJalali();
+    if(!inp._picker) inp._picker=new JalaliPicker(inp);
+  });
+  (scope||document).querySelectorAll('input[data-time="1"]').forEach(inp=>{
+    if(!inp.value) inp.value=nowTime();
+    if(!inp._picker) inp._picker=new TimePicker(inp);
+  });
+}
+
+// ============================================================
+//  توست
+// ============================================================
+let toastTimer;
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.className='toast '+type;
+  el.textContent=msg;
+  requestAnimationFrame(()=>el.classList.add('show'));
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ============================================================
+//  API
+// ============================================================
+async function api(path,options={}){
+  const res=await fetch(path,{
+    ...options,
+    headers:{ 'Content-Type':'application/json', ...(options.headers||{}) }
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error||`خطای ${res.status}`);
+  return data;
+}
+
+// ============================================================
+//  وضعیت کلی
+// ============================================================
+let USER=null;
+let CATEGORIES=[];
+let INVENTORY=[];
+let STOCK=[];
+let STRUCTURES=[];
+let DRILLING=[];
+let CUSTOMERS=[];
+let OUTBOUND=[];
+
+// ============================================================
+//  ورود / خروج
+// ============================================================
+async function doLogin(){
+  const username=document.getElementById('lg-user').value.trim();
+  const password=document.getElementById('lg-pass').value;
+  const btn=document.getElementById('lg-btn');
+  const err=document.getElementById('lg-err');
+  if(!username||!password){ err.textContent='نام کاربری و رمز را وارد کنید'; return; }
+  btn.disabled=true; btn.textContent='در حال ورود...'; err.textContent='';
+  try{
+    const user=await api('/api/login',{
+      method:'POST', body:JSON.stringify({username,password})
+    });
+    USER=user;
+    sessionStorage.setItem('wh_user',JSON.stringify(USER));
+    await startApp();
+  }catch(e){
+    err.textContent=e.message;
+    btn.disabled=false; btn.textContent='ورود';
+  }
+}
+function logout(){
+  if(!confirm('از سامانه خارج می‌شوید؟')) return;
+  sessionStorage.removeItem('wh_user');
+  location.reload();
+}
+
+// ============================================================
+//  ناوبری
+// ============================================================
+const TABS=[
+  {key:'dashboard', title:'🏠 داشبورد'},
+  {key:'incoming', title:'📥 ورودی انبار'},
+  {key:'outgoing', title:'📤 خروجی انبار'},
+  {key:'stock', title:'📊 موجودی'},
+  {key:'structures', title:'🏗️ آماده‌سازی سازه'},
+  {key:'drilling', title:'🕳️ سوراخ‌کاری'},
+  {key:'customers', title:'👥 مشتریان'},
+  {key:'delivery', title:'🚚 ارسال به مشتری'}
+];
+
+function buildNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML=TABS.map((t,i)=>
+    `<button data-key="${t.key}" class="${i===0?'active':''}"
+      onclick="show('${t.key}',this)">${t.title}</button>`
+  ).join('');
+}
+
+function show(key,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('sec-'+key);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(key==='stock') renderStock();
+  if(key==='drilling') renderDrillingList();
+  if(key==='dashboard') renderDashboard();
+}
+
+// ============================================================
+//  ساخت بخش‌ها (HTML اولیه)
+// ============================================================
+function buildSections(){
+  document.getElementById('main').innerHTML=`
+    <!-- داشبورد -->
+    <div id="sec-dashboard" class="section active">
+      <h2>🏠 داشبورد</h2>
+      <div class="stats" id="dash-stats"></div>
+      <div id="dash-latest"></div>
+    </div>
+
+    <!-- ورودی انبار -->
+    <div id="sec-incoming" class="section">
+      <h2>📥 ورودی انبار</h2>
+      <div class="info-box">
+        💡 مواد اولیه، پیچ، مهره، پنل، پالت و ... را اینجا ثبت کنید.
+      </div>
+      <div class="form-grid-3">
+        <div>
+          <label style="font-size:12px;color:#475569">دسته اصلی *</label>
+          <select id="in-main" onchange="updateInSub()"></select>
+        </div>
+        <div id="in-sub-wrap" style="display:none">
+          <label style="font-size:12px;color:#475569">زیر دسته</label>
+          <select id="in-sub" onchange="updateInPack()"></select>
+        </div>
+        <div id="in-pack-wrap" style="display:none">
+          <label style="font-size:12px;color:#475569">نوع بسته</label>
+          <select id="in-pack"></select>
+        </div>
+        <div id="in-size-wrap">
+          <label style="font-size:12px;color:#475569">سایز</label>
+          <input id="in-size" placeholder="مثلاً 10" list="size-list">
+          <datalist id="size-list"></datalist>
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">واحد</label>
+          <input id="in-unit" placeholder="عدد / شاخه / کیلو / پالت">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">تعداد *</label>
+          <input id="in-qty" type="number" min="0" step="any" placeholder="0">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">تأمین‌کننده</label>
+          <input id="in-supplier" placeholder="نام تأمین‌کننده">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">تاریخ</label>
+          <input id="in-date" data-jalali="1">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">ساعت</label>
+          <input id="in-time" data-time="1">
+        </div>
+        <div class="full">
+          <label style="font-size:12px;color:#475569">توضیحات</label>
+          <input id="in-note" placeholder="توضیحات (اختیاری)">
+        </div>
+      </div>
+      <button class="btn btn-block btn-green" onclick="addIncoming()">➕ ثبت ورودی</button>
+      <h3>آخرین ورودی‌ها</h3>
+      <div class="card-list" id="list-incoming"></div>
+    </div>
+
+    <!-- خروجی انبار -->
+    <div id="sec-outgoing" class="section">
+      <h2>📤 خروجی انبار</h2>
+      <div class="info-box">
+        💡 خروجی دستی مواد اولیه (غیر از سوراخ‌کاری که خودکار کسر می‌شود).
+      </div>
+      <div class="form-grid-3">
+        <div>
+          <label style="font-size:12px;color:#475569">دسته اصلی *</label>
+          <select id="out-main" onchange="updateOutSub()"></select>
+        </div>
+        <div id="out-sub-wrap" style="display:none">
+          <label style="font-size:12px;color:#475569">زیر دسته</label>
+          <select id="out-sub" onchange="updateOutPack()"></select>
+        </div>
+        <div id="out-pack-wrap" style="display:none">
+          <label style="font-size:12px;color:#475569">نوع بسته</label>
+          <select id="out-pack"></select>
+        </div>
+        <div id="out-size-wrap">
+          <label style="font-size:12px;color:#475569">سایز</label>
+          <input id="out-size" placeholder="مثلاً 10">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">واحد</label>
+          <input id="out-unit" placeholder="عدد / شاخه / کیلو / پالت">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">تعداد *</label>
+          <input id="out-qty" type="number" min="0" step="any" placeholder="0">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">تحویل‌گیرنده</label>
+          <input id="out-receiver" placeholder="نام تحویل‌گیرنده">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">تاریخ</label>
+          <input id="out-date" data-jalali="1">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">ساعت</label>
+          <input id="out-time" data-time="1">
+        </div>
+        <div class="full">
+          <label style="font-size:12px;color:#475569">توضیحات</label>
+          <input id="out-note" placeholder="توضیحات (اختیاری)">
+        </div>
+      </div>
+      <button class="btn btn-block btn-orange" onclick="addOutgoing()">➕ ثبت خروجی</button>
+      <h3>آخرین خروجی‌ها</h3>
+      <div class="card-list" id="list-outgoing"></div>
+    </div>
+
+    <!-- موجودی -->
+    <div id="sec-stock" class="section">
+      <h2>📊 موجودی لحظه‌ای</h2>
+      <button class="btn btn-sm btn-gray" onclick="renderStock()" style="margin-bottom:10px">
+        🔄 بروزرسانی
+      </button>
+      <div id="stock-list"></div>
+    </div>
+
+    <!-- آماده‌سازی سازه -->
+    <div id="sec-structures" class="section">
+      <h2>🏗️ آماده‌سازی سازه</h2>
+      <div class="info-box">
+        💡 سازه بسازید، مواد اولیه‌اش رو مشخص کنید، و تیک برش/ساب/علامت‌گذاری بزنید.
+      </div>
+      <button class="btn btn-block" onclick="openStructureModal()" style="margin-bottom:12px">
+        ➕ ساخت سازه جدید
+      </button>
+      <h3>سازه‌ها</h3>
+      <div class="card-list" id="list-structures"></div>
+    </div>
+
+    <!-- سوراخ‌کاری -->
+    <div id="sec-drilling" class="section">
+      <h2>🕳️ سوراخ‌کاری</h2>
+      <div class="info-box">
+        💡 برای هر سازه یک برگه سوراخ‌کاری بسازید. موادی که وارد می‌کنید
+        به‌طور خودکار از انبار کسر می‌شود.
+      </div>
+      <button class="btn btn-block btn-purple" onclick="openDrillingModal()" style="margin-bottom:12px">
+        ➕ سوراخ‌کاری جدید
+      </button>
+      <h3>سوراخ‌کاری‌های ثبت شده</h3>
+      <div class="card-list" id="list-drilling"></div>
+    </div>
+
+    <!-- مشتریان -->
+    <div id="sec-customers" class="section">
+      <h2>👥 مشتریان</h2>
+      <div class="form-grid">
+        <input id="cus-name" placeholder="نام مشتری *">
+        <input id="cus-phone" placeholder="تلفن">
+        <input id="cus-address" placeholder="آدرس" class="full">
+        <input id="cus-note" placeholder="توضیحات" class="full">
+      </div>
+      <button class="btn btn-block btn-green" onclick="addCustomer()">➕ افزودن مشتری</button>
+      <h3>لیست مشتریان</h3>
+      <div class="card-list" id="list-customers"></div>
+    </div>
+
+    <!-- ارسال به مشتری -->
+    <div id="sec-delivery" class="section">
+      <h2>🚚 ارسال به مشتری</h2>
+      <div class="info-box">
+        💡 سازه‌های آماده رو به مشتری تحویل بدید و بارنامه ثبت کنید.
+      </div>
+      <div class="form-grid-3">
+        <div class="full">
+          <label style="font-size:12px;color:#475569">سازه *</label>
+          <select id="del-structure"></select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">مشتری *</label>
+          <select id="del-customer"></select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">تعداد</label>
+          <input id="del-qty" type="number" value="1" min="1">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">راننده</label>
+          <input id="del-driver" placeholder="نام راننده">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">پلاک</label>
+          <input id="del-plate" placeholder="پلاک خودرو">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">بارنامه</label>
+          <input id="del-waybill" placeholder="شماره بارنامه">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">تاریخ</label>
+          <input id="del-date" data-jalali="1">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#475569">ساعت</label>
+          <input id="del-time" data-time="1">
+        </div>
+        <div class="full">
+          <label style="font-size:12px;color:#475569">توضیحات</label>
+          <input id="del-note" placeholder="توضیحات (اختیاری)">
+        </div>
+      </div>
+      <button class="btn btn-block" onclick="addDelivery()">➕ ثبت ارسال</button>
+      <h3>ارسال‌های ثبت شده</h3>
+      <div class="card-list" id="list-delivery"></div>
+    </div>
+  `;
+}
+
+// ============================================================
+//  بارگذاری داده‌ها
+// ============================================================
+async function loadAll(){
+  try{
+    [CATEGORIES, INVENTORY, STOCK, STRUCTURES, DRILLING, CUSTOMERS, OUTBOUND] =
+      await Promise.all([
+        api('/api/categories'),
+        api('/api/inventory'),
+        api('/api/stock'),
+        api('/api/structures'),
+        api('/api/drilling'),
+        api('/api/customers'),
+        api('/api/outbound')
+      ]);
+    refreshSelects();
+    renderAllLists();
+    renderDashboard();
+  }catch(e){
+    console.error(e);
+    toast('خطا در بارگذاری: '+e.message,'error');
+  }
+}
+
+function refreshSelects(){
+  // دسته اصلی
+  const mains = [...new Set(CATEGORIES.map(c=>c.main_cat))];
+  ['in-main','out-main'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = mains.map(m=>`<option value="${m}">${m}</option>`).join('');
+  });
+  updateInSub(); updateOutSub();
+
+  // سازه‌ها برای delivery
+  const sel=document.getElementById('del-structure');
+  if(sel){
+    sel.innerHTML = '<option value="">-- انتخاب کنید --</option>' +
+      STRUCTURES.filter(s=>s.status_drill).map(s=>
+        `<option value="${s.id}">${s.code||''} - ${s.title} (${s.panel_count} پنل)</option>`
+      ).join('');
+  }
+  // مشتری‌ها
+  const cSel=document.getElementById('del-customer');
+  if(cSel){
+    cSel.innerHTML = '<option value="">-- انتخاب کنید --</option>' +
+      CUSTOMERS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  }
+}
+
+// ============================================================
+//  ورودی/خروجی: مدیریت زیردسته‌ها
+// ============================================================
+function updateInSub(){
+  const main=document.getElementById('in-main').value;
+  const subs=[...new Set(CATEGORIES.filter(c=>c.main_cat===main && c.sub_cat).map(c=>c.sub_cat))];
+  const wrap=document.getElementById('in-sub-wrap');
+  const sel=document.getElementById('in-sub');
+  if(subs.length){
+    wrap.style.display='block';
+    sel.innerHTML=subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+    updateInPack();
+  } else {
+    wrap.style.display='none';
+    sel.innerHTML='';
+    updateInPack();
+  }
+  // سایز
+  const sizes=[...new Set(CATEGORIES.filter(c=>c.main_cat===main && c.size).map(c=>c.size))];
+  const dl=document.getElementById('size-list');
+  if(dl) dl.innerHTML=sizes.map(s=>`<option value="${s}">`).join('');
+  // واحد پیشنهادی
+  const first=CATEGORIES.find(c=>c.main_cat===main);
+  if(first) document.getElementById('in-unit').value=first.unit||'عدد';
+}
+function updateInPack(){
+  const main=document.getElementById('in-main').value;
+  const sub=document.getElementById('in-sub').value;
+  const packs=[...new Set(CATEGORIES.filter(c=>c.main_cat===main && c.sub_cat===sub && c.pack_type).map(c=>c.pack_type))];
+  const wrap=document.getElementById('in-pack-wrap');
+  const sel=document.getElementById('in-pack');
+  if(packs.length){
+    wrap.style.display='block';
+    sel.innerHTML=packs.map(p=>`<option value="${p}">${p}</option>`).join('');
+  } else {
+    wrap.style.display='none';
+    sel.innerHTML='';
+  }
+}
+
+function updateOutSub(){
+  const main=document.getElementById('out-main').value;
+  const subs=[...new Set(CATEGORIES.filter(c=>c.main_cat===main && c.sub_cat).map(c=>c.sub_cat))];
+  const wrap=document.getElementById('out-sub-wrap');
+  const sel=document.getElementById('out-sub');
+  if(subs.length){
+    wrap.style.display='block';
+    sel.innerHTML=subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+    updateOutPack();
+  } else {
+    wrap.style.display='none';
+    sel.innerHTML='';
+    updateOutPack();
+  }
+  const first=CATEGORIES.find(c=>c.main_cat===main);
+  if(first) document.getElementById('out-unit').value=first.unit||'عدد';
+}
+function updateOutPack(){
+  const main=document.getElementById('out-main').value;
+  const sub=document.getElementById('out-sub').value;
+  const packs=[...new Set(CATEGORIES.filter(c=>c.main_cat===main && c.sub_cat===sub && c.pack_type).map(c=>c.pack_type))];
+  const wrap=document.getElementById('out-pack-wrap');
+  const sel=document.getElementById('out-pack');
+  if(packs.length){
+    wrap.style.display='block';
+    sel.innerHTML=packs.map(p=>`<option value="${p}">${p}</option>`).join('');
+  } else {
+    wrap.style.display='none';
+    sel.innerHTML='';
+  }
+}
+
+// ============================================================
+//  ورودی انبار
+// ============================================================
+async function addIncoming(){
+  const main=document.getElementById('in-main').value;
+  const sub=document.getElementById('in-sub').value || null;
+  const pack=document.getElementById('in-pack').value || null;
+  const size=document.getElementById('in-size').value.trim() || null;
+  const unit=document.getElementById('in-unit').value.trim() || 'عدد';
+  const qty=parseFloat(document.getElementById('in-qty').value)||0;
+  const supplier=document.getElementById('in-supplier').value.trim();
+  const date=document.getElementById('in-date').value || todayJalali();
+  const time=document.getElementById('in-time').value || nowTime();
+  const note=document.getElementById('in-note').value.trim();
+
+  if(!main){ toast('دسته اصلی را انتخاب کنید','error'); return; }
+  if(qty<=0){ toast('تعداد را وارد کنید','error'); return; }
+
+  try{
+    await api('/api/inventory',{
+      method:'POST',
+      body:JSON.stringify({
+        main_cat:main, sub_cat:sub, pack_type:pack, size:size,
+        unit, direction:'IN', qty, supplier, note, date, time,
+        username: USER.name || USER.username
+      })
+    });
+    toast('✅ ورودی ثبت شد','success');
+    // پاک کردن
+    ['in-size','in-qty','in-supplier','in-note'].forEach(id=>{
+      document.getElementById(id).value='';
+    });
+    document.getElementById('in-date').value=todayJalali();
+    document.getElementById('in-time').value=nowTime();
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+// ============================================================
+//  خروجی انبار
+// ============================================================
+async function addOutgoing(){
+  const main=document.getElementById('out-main').value;
+  const sub=document.getElementById('out-sub').value || null;
+  const pack=document.getElementById('out-pack').value || null;
+  const size=document.getElementById('out-size').value.trim() || null;
+  const unit=document.getElementById('out-unit').value.trim() || 'عدد';
+  const qty=parseFloat(document.getElementById('out-qty').value)||0;
+  const receiver=document.getElementById('out-receiver').value.trim();
+  const date=document.getElementById('out-date').value || todayJalali();
+  const time=document.getElementById('out-time').value || nowTime();
+  const note=document.getElementById('out-note').value.trim();
+
+  if(!main){ toast('دسته اصلی را انتخاب کنید','error'); return; }
+  if(qty<=0){ toast('تعداد را وارد کنید','error'); return; }
+
+  try{
+    await api('/api/inventory',{
+      method:'POST',
+      body:JSON.stringify({
+        main_cat:main, sub_cat:sub, pack_type:pack, size:size,
+        unit, direction:'OUT', qty, receiver, note, date, time,
+        username: USER.name || USER.username
+      })
+    });
+    toast('✅ خروجی ثبت شد','success');
+    ['out-size','out-qty','out-receiver','out-note'].forEach(id=>{
+      document.getElementById(id).value='';
+    });
+    document.getElementById('out-date').value=todayJalali();
+    document.getElementById('out-time').value=nowTime();
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+// ============================================================
+//  رندر لیست‌ها
+// ============================================================
+function renderAllLists(){
+  renderIncomingList();
+  renderOutgoingList();
+  renderStructures();
+  renderDrillingList();
+  renderCustomers();
+  renderDelivery();
+}
+
+function catDesc(r){
+  let s = r.main_cat || '';
+  if(r.sub_cat) s += ` - ${r.sub_cat}`;
+  if(r.pack_type) s += ` - ${r.pack_type}`;
+  if(r.size) s += ` - سایز ${r.size}`;
+  return s;
+}
+
+function renderIncomingList(){
+  const box=document.getElementById('list-incoming');
+  if(!box) return;
+  const rows=INVENTORY.filter(r=>r.direction==='IN').slice(0,20);
+  if(!rows.length){ box.innerHTML='<div class="empty">ورودی ثبت نشده</div>'; return; }
+  box.innerHTML=rows.map(r=>`
+    <div class="card">
+      <div class="card-header">
+        <strong>${catDesc(r)}</strong>
+        <span>
+          <span class="badge badge-in">${r.qty} ${r.unit||''}</span>
+        </span>
+      </div>
+      ${r.supplier?`<div class="card-row"><span>تأمین‌کننده:</span><span>${r.supplier}</span></div>`:''}
+      ${r.note?`<div class="card-row"><span>توضیحات:</span><span>${r.note}</span></div>`:''}
+      <div class="card-row"><span>تاریخ:</span><span>${formatJalali(r.date)} ${r.time||''}
+        <span class="rel-time">${relativeTime(r.date,r.time)}</span></span></div>
+      <div class="card-row"><span>ثبت‌کننده:</span><span style="color:#16a34a">${r.username||'-'}</span></div>
+      <div class="card-actions">
+        <button class="btn btn-xs btn-danger" onclick="deleteInv(${r.id})">🗑️ حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderOutgoingList(){
+  const box=document.getElementById('list-outgoing');
+  if(!box) return;
+  const rows=INVENTORY.filter(r=>r.direction==='OUT').slice(0,20);
+  if(!rows.length){ box.innerHTML='<div class="empty">خروجی ثبت نشده</div>'; return; }
+  box.innerHTML=rows.map(r=>`
+    <div class="card">
+      <div class="card-header">
+        <strong>${catDesc(r)}</strong>
+        <span class="badge badge-out">${r.qty} ${r.unit||''}</span>
+      </div>
+      ${r.receiver?`<div class="card-row"><span>تحویل‌گیرنده:</span><span>${r.receiver}</span></div>`:''}
+      ${r.note?`<div class="card-row"><span>توضیحات:</span><span>${r.note}</span></div>`:''}
+      <div class="card-row"><span>تاریخ:</span><span>${formatJalali(r.date)} ${r.time||''}
+        <span class="rel-time">${relativeTime(r.date,r.time)}</span></span></div>
+      <div class="card-row"><span>ثبت‌کننده:</span><span style="color:#16a34a">${r.username||'-'}</span></div>
+      <div class="card-actions">
+        <button class="btn btn-xs btn-danger" onclick="deleteInv(${r.id})">🗑️ حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteInv(id){
+  if(!confirm('حذف شود؟')) return;
+  try{
+    await api('/api/inventory/'+id,{method:'DELETE'});
+    toast('🗑️ حذف شد','success');
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+function renderStock(){
+  const box=document.getElementById('stock-list');
+  if(!box) return;
+  if(!STOCK.length){
+    box.innerHTML='<div class="empty">موجودی صفر است یا هنوز ورودی ثبت نشده</div>';
+    return;
+  }
+  box.innerHTML=STOCK.map(s=>`
+    <div class="card">
+      <div class="card-header">
+        <strong>${catDesc(s)}</strong>
+        <span class="badge ${s.qty>0?'badge-in':'badge-out'}">${s.qty} ${s.unit||''}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+//  سازه‌ها
+// ============================================================
+function openStructureModal(){
+  const html=`
+    <div class="modal-bg open" id="struct-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>🏗️ سازه جدید</h3>
+          <button class="btn btn-sm btn-gray" onclick="closeModal('struct-modal')">✕</button>
+        </div>
+
+        <div class="form-grid">
+          <input id="st-code" placeholder="کد سازه (مثلاً ST-001)">
+          <input id="st-title" placeholder="نام سازه *">
+          <input id="st-panel" type="number" placeholder="تعداد پنل" min="0">
+          <input id="st-panelspec" placeholder="مشخصات پنل (ابعاد، توان، ...)">
+          <input id="st-size" placeholder="ابعاد / توضیح سازه" class="full">
+        </div>
+
+        <h4>🛒 مواد اولیه سازه</h4>
+        <div id="mat-list"></div>
+        <div class="item-row" style="background:#eff6ff;border:2px dashed #2563eb">
+          <select id="mat-type">
+            <option>ناودانی</option>
+            <option>نبشی</option>
+            <option>ورق U</option>
+            <option>ورق C</option>
+            <option>گالوانیزه</option>
+            <option>پیچ</option>
+            <option>مهره</option>
+            <option>سایر</option>
+          </select>
+          <input id="mat-size" placeholder="سایز">
+          <input id="mat-qty" type="number" placeholder="تعداد" min="0" step="any">
+          <input id="mat-unit" placeholder="واحد" value="شاخه">
+          <button class="del-btn" style="background:#2563eb" onclick="addMatRow()">➕</button>
+        </div>
+
+        <h3 style="margin-top:15px">👤 اطلاعات خریدار (اختیاری)</h3>
+        <div class="form-grid">
+          <input id="st-customer" placeholder="نام خریدار">
+          <input id="st-phone" placeholder="تلفن خریدار">
+          <input id="st-address" placeholder="آدرس خریدار" class="full">
+        </div>
+
+        <h3 style="margin-top:15px">✅ مراحل انجام شده</h3>
+        <div class="checks">
+          <label class="check-item" id="chk-cut" onclick="toggleChk('cut')">
+            <input type="checkbox" id="cb-cut"> ✂️ برش
+          </label>
+          <label class="check-item" id="chk-sand" onclick="toggleChk('sand')">
+            <input type="checkbox" id="cb-sand"> 🧽 ساب
+          </label>
+          <label class="check-item" id="chk-mark" onclick="toggleChk('mark')">
+            <input type="checkbox" id="cb-mark"> 📏 علامت‌گذاری
+          </label>
+        </div>
+
+        <div class="form-grid" style="margin-top:10px">
+          <input id="st-note" placeholder="توضیحات" class="full">
+        </div>
+
+        <button class="btn btn-block btn-green" onclick="saveStructure()"
+          style="margin-top:12px">💾 ذخیره سازه</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend',html);
+  window._structureMats=[];
+  initJalaliInputs(document.getElementById('struct-modal'));
+}
+
+function addMatRow(){
+  const type=document.getElementById('mat-type').value;
+  const size=document.getElementById('mat-size').value.trim();
+  const qty=parseFloat(document.getElementById('mat-qty').value)||0;
+  const unit=document.getElementById('mat-unit').value.trim()||'عدد';
+  if(qty<=0){ toast('تعداد را وارد کنید','error'); return; }
+  window._structureMats.push({material_type:type,size,qty,unit});
+  renderMatList();
+  document.getElementById('mat-size').value='';
+  document.getElementById('mat-qty').value='';
+}
+
+function renderMatList(){
+  const box=document.getElementById('mat-list');
+  const list=window._structureMats||[];
+  if(!list.length){
+    box.innerHTML='<div class="empty" style="padding:10px;font-size:12px">هنوز ماده‌ای اضافه نشده</div>';
+    return;
+  }
+  box.innerHTML=list.map((m,i)=>`
+    <div class="item-row">
+      <span>${m.material_type}</span>
+      <span>سایز: ${m.size||'-'}</span>
+      <span>${m.qty} ${m.unit}</span>
+      <span></span>
+      <button class="del-btn" onclick="removeMatRow(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeMatRow(i){
+  window._structureMats.splice(i,1);
+  renderMatList();
+}
+
+function toggleChk(key){
+  const cb=document.getElementById('cb-'+key);
+  const lbl=document.getElementById('chk-'+key);
+  cb.checked=!cb.checked;
+  lbl.classList.toggle('done',cb.checked);
+}
+
+async function saveStructure(){
+  const title=document.getElementById('st-title').value.trim();
+  if(!title){ toast('نام سازه الزامی است','error'); return; }
+  if(!(window._structureMats||[]).length){
+    toast('حداقل یک ماده اولیه اضافه کنید','error'); return;
+  }
+
+  const body={
+    code: document.getElementById('st-code').value.trim(),
+    title,
+    panel_count: parseInt(document.getElementById('st-panel').value)||0,
+    panel_spec: document.getElementById('st-panelspec').value.trim(),
+    size_desc: document.getElementById('st-size').value.trim(),
+    customer: document.getElementById('st-customer').value.trim(),
+    customer_phone: document.getElementById('st-phone').value.trim(),
+    customer_address: document.getElementById('st-address').value.trim(),
+    status_cut: document.getElementById('cb-cut').checked,
+    status_sand: document.getElementById('cb-sand').checked,
+    status_mark: document.getElementById('cb-mark').checked,
+    status_drill: false,
+    note: document.getElementById('st-note').value.trim(),
+    date: todayJalali(),
+    time: nowTime(),
+    username: USER.name || USER.username
+  };
+
+  try{
+    const res=await api('/api/structures',{
+      method:'POST', body:JSON.stringify(body)
+    });
+    const sid=res.data?.id;
+    // ذخیره مواد
+    for(const m of window._structureMats){
+      await api('/api/structure_materials',{
+        method:'POST',
+        body:JSON.stringify({
+          structure_id:sid,
+          material_type:m.material_type,
+          size:m.size,
+          qty:m.qty,
+          unit:m.unit
+        })
+      });
+    }
+    toast('✅ سازه ذخیره شد','success');
+    closeModal('struct-modal');
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+function closeModal(id){
+  const el=document.getElementById(id);
+  if(el) el.remove();
+}
+
+async function renderStructures(){
+  const box=document.getElementById('list-structures');
+  if(!box) return;
+  if(!STRUCTURES.length){
+    box.innerHTML='<div class="empty">سازه‌ای ثبت نشده</div>';
+    return;
+  }
+  // گرفتن مواد هر سازه
+  const results=[];
+  for(const s of STRUCTURES){
+    try{
+      const mats=await api(`/api/structures/${s.id}/materials`);
+      results.push({s,mats});
+    }catch(e){ results.push({s,mats:[]}); }
+  }
+  box.innerHTML=results.map(({s,mats})=>{
+    const checks=`
+      ${s.status_cut?'<span class="badge badge-in">✂️ برش</span>':''}
+      ${s.status_sand?'<span class="badge badge-in">🧽 ساب</span>':''}
+      ${s.status_mark?'<span class="badge badge-in">📏 علامت</span>':''}
+      ${s.status_drill?'<span class="badge badge-purple" style="background:#7c3aed">🕳️ سوراخ</span>':''}
+    `;
+    return `
+      <div class="card">
+        <div class="card-header">
+          <strong>${s.code||''} ${s.title}</strong>
+          <span>${s.panel_count||0} پنل</span>
+        </div>
+        ${s.panel_spec?`<div class="card-row"><span>مشخصات پنل:</span><span>${s.panel_spec}</span></div>`:''}
+        ${s.size_desc?`<div class="card-row"><span>ابعاد:</span><span>${s.size_desc}</span></div>`:''}
+        ${s.customer?`<div class="card-row"><span>خریدار:</span><span>${s.customer}</span></div>`:''}
+        <div style="margin:8px 0">${checks}</div>
+        <div class="structure-materials-list">
+          <strong style="font-size:12px;color:#1e3a8a">🛒 مواد اولیه:</strong>
+          ${mats.length?mats.map(m=>`
+            <div class="mat-item">
+              <span>${m.material_type} ${m.size?'سایز '+m.size:''}</span>
+              <span>${m.qty} ${m.unit||''}</span>
+            </div>
+          `).join(''):'<div class="empty" style="padding:8px">موادی ثبت نشده</div>'}
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-xs" onclick="toggleStructChk(${s.id},'cut')">
+            ${s.status_cut?'❌ لغو برش':'✂️ برش انجام شد'}
+          </button>
+          <button class="btn btn-xs" onclick="toggleStructChk(${s.id},'sand')">
+            ${s.status_sand?'❌ لغو ساب':'🧽 ساب انجام شد'}
+          </button>
+          <button class="btn btn-xs" onclick="toggleStructChk(${s.id},'mark')">
+            ${s.status_mark?'❌ لغو علامت':'📏 علامت انجام شد'}
+          </button>
+          <button class="btn btn-xs btn-danger" onclick="deleteStructure(${s.id})">🗑️</button>
+        </div>
+        <div class="card-row" style="margin-top:6px">
+          <span>تاریخ:</span>
+          <span>${formatJalali(s.date)} ${s.time||''}
+            <span class="rel-time">${relativeTime(s.date,s.time)}</span></span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function toggleStructChk(id,field){
+  const s=STRUCTURES.find(x=>x.id===id);
+  if(!s) return;
+  const key='status_'+field;
+  try{
+    await api('/api/structures/'+id,{
+      method:'PATCH',
+      body:JSON.stringify({[key]: !s[key]})
+    });
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+async function deleteStructure(id){
+  if(!confirm('سازه و مواد اولیه‌اش حذف شوند؟')) return;
+  try{
+    await api('/api/structures/'+id,{method:'DELETE'});
+    toast('🗑️ حذف شد','success');
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+// ============================================================
+//  سوراخ‌کاری
+// ============================================================
+function openDrillingModal(){
+  const structOpts = STRUCTURES.map(s=>
+    `<option value="${s.id}">${s.code||''} ${s.title} (${s.panel_count} پنل)</option>`
+  ).join('');
+
+  const html=`
+    <div class="modal-bg open" id="drill-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>🕳️ سوراخ‌کاری جدید</h3>
+          <button class="btn btn-sm btn-gray" onclick="closeModal('drill-modal')">✕</button>
+        </div>
+
+        <div class="form-grid">
+          <input id="dr-code" placeholder="کد سوراخ‌کاری">
+          <input id="dr-title" placeholder="عنوان *">
+          <div class="full">
+            <label style="font-size:12px;color:#475569">سازه مرتبط (اختیاری)</label>
+            <select id="dr-structure" onchange="onDrillStructChange()">
+              <option value="">-- انتخاب سازه --</option>
+              ${structOpts}
+            </select>
+          </div>
+          <input id="dr-panel" type="number" placeholder="تعداد پنل" min="0">
+          <input id="dr-panelspec" placeholder="مشخصات پنل">
+          <input id="dr-note" placeholder="توضیحات" class="full">
+        </div>
+
+        <h4>🔩 اقلام مورد استفاده</h4>
+        <div class="warn-box">
+          ⚠️ توجه: با ثبت این فرم، مواد زیر به‌طور خودکار از انبار کسر می‌شوند.
+        </div>
+        <div id="drill-items"></div>
+        <div class="item-row" style="background:#eff6ff;border:2px dashed #7c3aed">
+          <select id="di-type">
+            <option>ناودانی</option>
+            <option>نبشی</option>
+            <option>ورق U</option>
+            <option>ورق C</option>
+            <option>گالوانیزه</option>
+            <option>پیچ</option>
+            <option>مهره</option>
+          </select>
+          <input id="di-size" placeholder="سایز">
+          <input id="di-qty" type="number" placeholder="تعداد" min="0" step="any">
+          <input id="di-unit" placeholder="واحد" value="شاخه">
+          <button class="del-btn" style="background:#7c3aed" onclick="addDrillItemRow()">➕</button>
+        </div>
+
+        <button class="btn btn-block btn-purple" onclick="saveDrilling()"
+          style="margin-top:12px">💾 ثبت سوراخ‌کاری + کسر از انبار</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend',html);
+  window._drillItems=[];
+  initJalaliInputs(document.getElementById('drill-modal'));
+}
+
+function onDrillStructChange(){
+  const id=document.getElementById('dr-structure').value;
+  if(!id) return;
+  const s=STRUCTURES.find(x=>x.id==id);
+  if(!s) return;
+  document.getElementById('dr-title').value=s.title;
+  document.getElementById('dr-code').value=s.code||'';
+  document.getElementById('dr-panel').value=s.panel_count||0;
+  document.getElementById('dr-panelspec').value=s.panel_spec||'';
+}
+
+function addDrillItemRow(){
+  const type=document.getElementById('di-type').value;
+  const size=document.getElementById('di-size').value.trim();
+  const qty=parseFloat(document.getElementById('di-qty').value)||0;
+  const unit=document.getElementById('di-unit').value.trim()||'عدد';
+  if(qty<=0){ toast('تعداد را وارد کنید','error'); return; }
+  window._drillItems.push({material_type:type,size,qty,unit});
+  renderDrillItems();
+  document.getElementById('di-size').value='';
+  document.getElementById('di-qty').value='';
+}
+
+function renderDrillItems(){
+  const box=document.getElementById('drill-items');
+  const list=window._drillItems||[];
+  if(!list.length){
+    box.innerHTML='<div class="empty" style="padding:10px;font-size:12px">موردی اضافه نشده</div>';
+    return;
+  }
+  box.innerHTML=list.map((m,i)=>`
+    <div class="item-row">
+      <span>${m.material_type}</span>
+      <span>سایز: ${m.size||'-'}</span>
+      <span>${m.qty} ${m.unit}</span>
+      <span></span>
+      <button class="del-btn" onclick="removeDrillItem(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeDrillItem(i){
+  window._drillItems.splice(i,1);
+  renderDrillItems();
+}
+
+async function saveDrilling(){
+  const title=document.getElementById('dr-title').value.trim();
+  if(!title){ toast('عنوان الزامی است','error'); return; }
+  if(!(window._drillItems||[]).length){
+    toast('حداقل یک قلم اضافه کنید','error'); return;
+  }
+
+  const structureId=document.getElementById('dr-structure').value || null;
+  const items=window._drillItems.map(it=>({
+    material_type:it.material_type,
+    size:it.size,
+    qty:it.qty,
+    unit:it.unit,
+    note:''
+  }));
+
+  const header={
+    code: document.getElementById('dr-code').value.trim(),
+    title,
+    structure_id: structureId,
+    panel_count: parseInt(document.getElementById('dr-panel').value)||0,
+    panel_spec: document.getElementById('dr-panelspec').value.trim(),
+    note: document.getElementById('dr-note').value.trim(),
+    total_materials: items.reduce((a,b)=>a+b.qty,0),
+    date: todayJalali(),
+    time: nowTime(),
+    username: USER.name || USER.username
+  };
+
+  try{
+    await api('/api/drilling/full',{
+      method:'POST',
+      body:JSON.stringify({header,items})
+    });
+    // اگر سازه مرتبط بود، تیک سوراخ‌کاری رو بزن
+    if(structureId){
+      await api('/api/structures/'+structureId,{
+        method:'PATCH',
+        body:JSON.stringify({status_drill:true})
+      });
+    }
+    toast('✅ سوراخ‌کاری ثبت و مواد کسر شد','success');
+    closeModal('drill-modal');
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+async function renderDrillingList(){
+  const box=document.getElementById('list-drilling');
+  if(!box) return;
+  if(!DRILLING.length){
+    box.innerHTML='<div class="empty">سوراخ‌کاری‌ای ثبت نشده</div>';
+    return;
+  }
+  box.innerHTML=DRILLING.map(d=>`
+    <div class="card">
+      <div class="card-header">
+        <strong>${d.code||''} ${d.title}</strong>
+        <span>${d.panel_count||0} پنل</span>
+      </div>
+      ${d.panel_spec?`<div class="card-row"><span>مشخصات پنل:</span><span>${d.panel_spec}</span></div>`:''}
+      <div class="card-row"><span>مجموع اقلام:</span><span>${d.total_materials||0}</span></div>
+      ${d.note?`<div class="card-row"><span>توضیحات:</span><span>${d.note}</span></div>`:''}
+      <div class="card-row"><span>تاریخ:</span><span>${formatJalali(d.date)} ${d.time||''}
+        <span class="rel-time">${relativeTime(d.date,d.time)}</span></span></div>
+      <div class="card-actions">
+        <button class="btn btn-xs" onclick="viewDrillingItems(${d.id})">👁️ اقلام</button>
+        <button class="btn btn-xs btn-danger" onclick="deleteDrilling(${d.id})">🗑️ حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function viewDrillingItems(id){
+  try{
+    const items=await api(`/api/drilling/${id}/items`);
+    const html=`
+      <div class="modal-bg open" id="items-modal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3>🔩 اقلام سوراخ‌کاری #${id}</h3>
+            <button class="btn btn-sm btn-gray" onclick="closeModal('items-modal')">✕</button>
+          </div>
+          ${items.length?items.map(it=>`
+            <div class="item-row">
+              <input value="${it.material_type}" onchange="updateDrillItem(${it.id},'material_type',this.value)">
+              <input value="${it.size||''}" onchange="updateDrillItem(${it.id},'size',this.value)">
+              <input type="number" value="${it.qty}" onchange="updateDrillItem(${it.id},'qty',this.value)">
+              <input value="${it.unit||''}" onchange="updateDrillItem(${it.id},'unit',this.value)">
+              <button class="del-btn" onclick="deleteDrillItem(${it.id},${id})">🗑️</button>
+            </div>
+          `).join(''):'<div class="empty">موردی نیست</div>'}
+          <p style="font-size:11px;color:#94a3b8;margin-top:10px">
+            ✏️ برای ویرایش، مقدار جدید را وارد کنید و Enter بزنید.
+          </p>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend',html);
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+async function updateDrillItem(id,field,value){
+  try{
+    const body={};
+    body[field] = field==='qty' ? parseFloat(value)||0 : value;
+    await api('/api/drilling_items/'+id,{
+      method:'PATCH', body:JSON.stringify(body)
+    });
+    toast('✏️ ویرایش شد','success');
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+async function deleteDrillItem(id,drillId){
+  if(!confirm('این قلم حذف شود؟')) return;
+  try{
+    await api('/api/drilling_items/'+id,{method:'DELETE'});
+    closeModal('items-modal');
+    await viewDrillingItems(drillId);
+    toast('🗑️ حذف شد','success');
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+async function deleteDrilling(id){
+  if(!confirm('کل سوراخ‌کاری حذف شود؟ (مواد برگشت داده نمی‌شوند)')) return;
+  try{
+    await api('/api/drilling/'+id,{method:'DELETE'});
+    toast('🗑️ حذف شد','success');
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+// ============================================================
+//  مشتریان
+// ============================================================
+async function addCustomer(){
+  const name=document.getElementById('cus-name').value.trim();
+  if(!name){ toast('نام مشتری الزامی است','error'); return; }
+  try{
+    await api('/api/customers',{
+      method:'POST',
+      body:JSON.stringify({
+        name,
+        phone: document.getElementById('cus-phone').value.trim(),
+        address: document.getElementById('cus-address').value.trim(),
+        note: document.getElementById('cus-note').value.trim()
+      })
+    });
+    toast('✅ مشتری اضافه شد','success');
+    ['cus-name','cus-phone','cus-address','cus-note'].forEach(id=>{
+      document.getElementById(id).value='';
+    });
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+function renderCustomers(){
+  const box=document.getElementById('list-customers');
+  if(!box) return;
+  if(!CUSTOMERS.length){
+    box.innerHTML='<div class="empty">مشتری‌ای ثبت نشده</div>';
+    return;
+  }
+  box.innerHTML=CUSTOMERS.map(c=>`
+    <div class="card">
+      <div class="card-header">
+        <strong>${c.name}</strong>
+      </div>
+      ${c.phone?`<div class="card-row"><span>تلفن:</span><span>${c.phone}</span></div>`:''}
+      ${c.address?`<div class="card-row"><span>آدرس:</span><span>${c.address}</span></div>`:''}
+      ${c.note?`<div class="card-row"><span>توضیحات:</span><span>${c.note}</span></div>`:''}
+    </div>
+  `).join('');
+}
+
+// ============================================================
+//  ارسال به مشتری
+// ============================================================
+async function addDelivery(){
+  const sid=document.getElementById('del-structure').value;
+  const cid=document.getElementById('del-customer').value;
+  if(!sid){ toast('سازه را انتخاب کنید','error'); return; }
+  if(!cid){ toast('مشتری را انتخاب کنید','error'); return; }
+
+  const s=STRUCTURES.find(x=>x.id==sid);
+  const c=CUSTOMERS.find(x=>x.id==cid);
+
+  try{
+    await api('/api/outbound',{
+      method:'POST',
+      body:JSON.stringify({
+        structure_id: sid,
+        structure_title: s?s.title:'',
+        customer_id: cid,
+        customer_name: c?c.name:'',
+        qty: parseInt(document.getElementById('del-qty').value)||1,
+        driver: document.getElementById('del-driver').value.trim(),
+        plate: document.getElementById('del-plate').value.trim(),
+        waybill: document.getElementById('del-waybill').value.trim(),
+        date: document.getElementById('del-date').value || todayJalali(),
+        time: document.getElementById('del-time').value || nowTime(),
+        note: document.getElementById('del-note').value.trim(),
+        username: USER.name || USER.username
+      })
+    });
+    toast('✅ ارسال ثبت شد','success');
+    ['del-qty','del-driver','del-plate','del-waybill','del-note'].forEach(id=>{
+      document.getElementById(id).value='';
+    });
+    document.getElementById('del-date').value=todayJalali();
+    document.getElementById('del-time').value=nowTime();
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+function renderDelivery(){
+  const box=document.getElementById('list-delivery');
+  if(!box) return;
+  if(!OUTBOUND.length){
+    box.innerHTML='<div class="empty">ارسالی ثبت نشده</div>';
+    return;
+  }
+  box.innerHTML=OUTBOUND.map(d=>`
+    <div class="card">
+      <div class="card-header">
+        <strong>${d.structure_title||'-'}</strong>
+        <span class="badge badge-info">${d.qty} عدد</span>
+      </div>
+      <div class="card-row"><span>مشتری:</span><span>${d.customer_name||'-'}</span></div>
+      ${d.driver?`<div class="card-row"><span>راننده:</span><span>${d.driver}</span></div>`:''}
+      ${d.plate?`<div class="card-row"><span>پلاک:</span><span>${d.plate}</span></div>`:''}
+      ${d.waybill?`<div class="card-row"><span>بارنامه:</span><span>${d.waybill}</span></div>`:''}
+      ${d.note?`<div class="card-row"><span>توضیحات:</span><span>${d.note}</span></div>`:''}
+      <div class="card-row"><span>تاریخ:</span><span>${formatJalali(d.date)} ${d.time||''}
+        <span class="rel-time">${relativeTime(d.date,d.time)}</span></span></div>
+      <div class="card-actions">
+        <button class="btn btn-xs btn-danger" onclick="deleteDelivery(${d.id})">🗑️ حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteDelivery(id){
+  if(!confirm('حذف شود؟')) return;
+  try{
+    await api('/api/outbound/'+id,{method:'DELETE'});
+    toast('🗑️ حذف شد','success');
+    await loadAll();
+  }catch(e){ toast('❌ '+e.message,'error'); }
+}
+
+// ============================================================
+//  داشبورد
+// ============================================================
+function renderDashboard(){
+  const box=document.getElementById('dash-stats');
+  if(!box) return;
+  const inCount=INVENTORY.filter(r=>r.direction==='IN').length;
+  const outCount=INVENTORY.filter(r=>r.direction==='OUT').length;
+  box.innerHTML=`
+    <div class="stat-card">
+      <h3>📥 ورودی‌ها</h3><p>${inCount}</p>
+    </div>
+    <div class="stat-card">
+      <h3>📤 خروجی‌ها</h3><p>${outCount}</p>
+    </div>
+    <div class="stat-card">
+      <h3>🏗️ سازه‌ها</h3><p>${STRUCTURES.length}</p>
+    </div>
+    <div class="stat-card">
+      <h3>🕳️ سوراخ‌کاری</h3><p>${DRILLING.length}</p>
+    </div>
+    <div class="stat-card">
+      <h3>👥 مشتریان</h3><p>${CUSTOMERS.length}</p>
+    </div>
+    <div class="stat-card">
+      <h3>🚚 ارسال‌ها</h3><p>${OUTBOUND.length}</p>
+    </div>
+  `;
+
+  const latest=INVENTORY.slice(0,5);
+  document.getElementById('dash-latest').innerHTML=`
+    <h3>🕒 آخرین فعالیت‌ها</h3>
+    ${latest.length?latest.map(r=>`
+      <div class="card">
+        <div class="card-header">
+          <strong>${r.direction==='IN'?'📥':'📤'} ${catDesc(r)}</strong>
+          <span class="badge ${r.direction==='IN'?'badge-in':'badge-out'}">
+            ${r.qty} ${r.unit||''}
+          </span>
+        </div>
+        <div class="card-row"><span>تاریخ:</span><span>${formatJalali(r.date)} ${r.time||''}
+          <span class="rel-time">${relativeTime(r.date,r.time)}</span></span></div>
+      </div>
+    `).join(''):'<div class="empty">فعالیتی ثبت نشده</div>'}
+  `;
+}
+
+// ============================================================
+//  تاریخ هدر
+// ============================================================
+function updateTopDate(){
+  const d=new Date();
+  const dow=FA_DOW_FULL[(d.getDay()+1)%7];
+  const j=todayJalali();
+  const [jy,jm,jd]=j.split('/');
+  document.getElementById('topDate').textContent=
+    `${dow} ${jd} ${FA_MONTHS[+jm-1]} ${jy}`;
+}
+
+// ============================================================
+//  شروع
+// ============================================================
+async function startApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('curUser').textContent=USER.name||USER.username;
+
+  buildNav();
+  buildSections();
+  initJalaliInputs();
+  updateTopDate();
+  setInterval(updateTopDate,60000);
+
+  await loadAll();
+
+  // همگام‌سازی خودکار هر ۳۰ ثانیه
+  setInterval(async ()=>{
+    if(document.visibilityState==='visible'){
+      await loadAll();
+    }
+  }, 30000);
+}
+
+// Enter در رمز
+document.getElementById('lg-pass').addEventListener('keypress',e=>{
+  if(e.key==='Enter') doLogin();
+});
+
+// بررسی نشست قبلی
+(async ()=>{
+  const saved=sessionStorage.getItem('wh_user');
+  if(saved){
+    try{
+      USER=JSON.parse(saved);
+      await api('/api/health');
+      await startApp();
+    }catch(e){
+      sessionStorage.removeItem('wh_user');
+      USER=null;
+    }
+  }
+})();
+</script>
+</body>
+  </html>
